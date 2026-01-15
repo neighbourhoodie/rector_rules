@@ -33,3 +33,7 @@ vendor/bin/rector process src --dry-run
 vendor/bin/rector process src
 ```
 The files in the `src/` directory will either be full on modified or (in the case of `--dry-run`) the changes that would be made will be previewed.
+
+## Rule specifics
+
+Details on specific rules can be found [here](./src/README.MD).

@@ -16,6 +16,11 @@ return RectorConfig::configure()
     ->withRules([
         RSAMethodRector::class,
         RSANewRector::class,
+        CreateKey::class,
+        SFTPFilesize::class,
+        HashLength::class,
+        PublicKeyLoader::class,
+        PublicKeyLoaderChained::class,
     ])
     ->withConfiguredRule(RenameClassRector::class, [
         'phpseclib\Crypt\RSA' => 'phpseclib3\Crypt\RSA',
