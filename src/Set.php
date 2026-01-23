@@ -14,8 +14,6 @@ if (!class_exists('\phpseclib\phpseclib3Rector\Set'))
 
 return RectorConfig::configure()
     ->withRules([
-        RSAMethodRector::class,
-        RSANewRector::class,
         CreateKey::class,
         SFTPFilesize::class,
         HashLength::class,
