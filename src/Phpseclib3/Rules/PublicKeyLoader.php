@@ -14,7 +14,6 @@ use PhpParser\Node\Identifier;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Stmt\Expression;
 use PhpParser\Node\Stmt\UseUse;
-use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\New_;
 use PhpParser\Node\Expr\MethodCall;
@@ -179,20 +178,16 @@ final class PublicKeyLoader extends AbstractRector
                 $expr->args
             );
 
-            if ($newMethod === 'getLength' || $newMethod ===  'withSaltLength') {
-                return $this->wrap(
-                    $newMethodCall,
-                    $node
-                );
-            }
-            // In v2, Crypt/RSA.php was not immutable. In v3, it is.
-            return $this->wrap(
-                new Assign(
+            // Don't make getLength a fluent method
+            $replacement = $newMethod === 'getLength'
+                ? $newMethodCall
+                : new Assign(
                     new Variable($this->rsaVarName),
                     $newMethodCall
-                ),
-                $node
-            );
+                );
+
+            // In v2, Crypt/RSA.php was not immutable. In v3, it is.
+            return $this->wrap($replacement, $node);
         }
 
         if ($this->isName($expr->name, 'setEncryptionMode')) {
@@ -203,9 +198,12 @@ final class PublicKeyLoader extends AbstractRector
 
             $this->withPaddingInserted = true;
             return new Expression(
-                new MethodCall(
+                new Assign(
                     new Variable($this->rsaVarName),
-                    new Identifier('withPadding')
+                    new MethodCall(
+                        new Variable($this->rsaVarName),
+                        new Identifier('withPadding')
+                    )
                 )
             );
         }
@@ -217,9 +215,12 @@ final class PublicKeyLoader extends AbstractRector
 
             $this->withPaddingInserted = true;
             return new Expression(
-                new MethodCall(
+                new Assign(
                     new Variable($this->rsaVarName),
-                    new Identifier('withPadding')
+                    new MethodCall(
+                        new Variable($this->rsaVarName),
+                        new Identifier('withPadding')
+                    )
                 )
             );
         }
@@ -230,11 +231,12 @@ final class PublicKeyLoader extends AbstractRector
     {
         foreach ($nodes as $node) {
             if (
-                $node instanceof Expression
-                && $node->expr instanceof MethodCall
-                && $this->isName($node->expr->name, 'withPadding')
+                $node instanceof Expression &&
+                $node->expr instanceof Assign
+                && $node->expr->expr instanceof MethodCall
+                && $this->isName($node->expr->expr->name, 'withPadding')
             ) {
-                return $node->expr;
+                return $node->expr->expr;
             }
 
             // Descend into nested statement lists

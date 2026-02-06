@@ -20,7 +20,7 @@ class PublicKeyLoaderRsaClass {
   public static function PublicKeyLoaderSetEncryption()
   {
       $rsa = PublicKeyLoader::load('...');
-      $rsa->withPadding(RSA::ENCRYPTION_PKCS1);
+      $rsa = $rsa->withPadding(RSA::ENCRYPTION_PKCS1);
   }
 }
 

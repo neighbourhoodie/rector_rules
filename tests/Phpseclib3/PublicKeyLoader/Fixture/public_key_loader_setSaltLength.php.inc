@@ -20,7 +20,7 @@ class PublicKeyLoaderRsaClass {
   public static function PublicKeyLoaderFunc()
   {
       $rsa = PublicKeyLoader::load('...');
-      $rsa->withSaltLength(10);
+      $rsa = $rsa->withSaltLength(10);
   }
 }
 
