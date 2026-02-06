@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-namespace phpseclib\phpseclib3Rector;
+// namespace phpseclib\phpseclib3Rector;
+namespace Phpseclib\RectorRules\Phpseclib3\Rules;
 
 use PhpParser\Node;
 use PhpParser\Node\Name;
