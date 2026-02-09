@@ -11,8 +11,8 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "phpseclib\\phpseclib3Rector\\": "src/",
-            "phpseclib\\phpseclib3Rector\\Tests\\": "tests/"
+            "Phpseclib\\RectorRules\\": "src/",
+            "Phpseclib\\RectorRules\\Tests\\": "tests/"
         }
     },
     "authors": [
