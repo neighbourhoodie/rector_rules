@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
+use Phpseclib\RectorRules\Phpseclib4\Rules\ReadingX509CertsRector;
 
 return RectorConfig::configure()
     ->withPaths([
@@ -10,4 +11,5 @@ return RectorConfig::configure()
         __DIR__ . '/../../project',
     ])
     ->withRules([
+        ReadingX509CertsRector::class,
     ]);
