@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace phpseclib\phpseclib3Rector;
+namespace Phpseclib\RectorRules\Phpseclib3\Rules;
 
 use Rector\Rector\AbstractRector;
 

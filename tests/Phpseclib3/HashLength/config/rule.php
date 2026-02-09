@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
-use phpseclib\phpseclib3Rector\PublicKeyLoaderChained;
+use Phpseclib\RectorRules\Phpseclib3\Rules\HashLength;
 
 return static function (RectorConfig $rectorConfig): void {
-    $rectorConfig->rule(PublicKeyLoaderChained::class);
+    $rectorConfig->rule(HashLength::class);
 };

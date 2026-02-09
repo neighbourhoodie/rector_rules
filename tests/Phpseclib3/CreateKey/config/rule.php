@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
-use phpseclib\phpseclib3Rector\CreateKey;
+use Phpseclib\RectorRules\Phpseclib3\Rules\CreateKey;
 
 return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->rule(CreateKey::class);
