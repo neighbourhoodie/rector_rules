@@ -104,10 +104,10 @@ Additionally it replaces the following methods:
 | $rsa->getSize()               | $rsa->getLength()                     |
 | $rsa->setHash('sha256');      | $rsa = $rsa->withHash('sha256')       |
 | $rsa->setMGFHash('sha256');   | $rsa = $rsa->withMGFHash('sha256')    |
-| $rsa->setSaltLength(10);      | $rsa->withSaltLength(10)              |
-| $rsa->setSignatureMode(RSA::SIGNATURE_PKCS1);     | $rsa->withPadding(RSA::SIGNATURE_PKCS1);  |
-| $rsa->setEncryptionMode(RSA::ENCRYPTION_PKCS1);   | $rsa->withPadding(RSA::ENCYRPTION_PKCS1); |
-| $rsa->setEncryptionMode(RSA::ENCRYPTION_PKCS1); $rsa->setSignatureMode(RSA::SIGNATURE_PKCS1); | $rsa->withPadding(RSA::SIGNATURE_PKCS1 | RSA::ENCYRPTION_PKCS1);|
+| $rsa->setSaltLength(10);      | $rsa = $rsa->withSaltLength(10)       |
+| $rsa->setSignatureMode(RSA::SIGNATURE_PKCS1);     | $rsa = $rsa->withPadding(RSA::SIGNATURE_PKCS1);  |
+| $rsa->setEncryptionMode(RSA::ENCRYPTION_PKCS1);   | $rsa = $rsa->withPadding(RSA::ENCYRPTION_PKCS1); |
+| $rsa->setEncryptionMode(RSA::ENCRYPTION_PKCS1); $rsa->setSignatureMode(RSA::SIGNATURE_PKCS1); | $rsa = $rsa->withPadding(RSA::SIGNATURE_PKCS1 | RSA::ENCYRPTION_PKCS1);|
 
 ### Public Key Loader Chained
 

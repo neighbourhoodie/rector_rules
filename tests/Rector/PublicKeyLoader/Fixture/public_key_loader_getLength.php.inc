@@ -3,16 +3,18 @@
 use phpseclib\Crypt\RSA;
 
 class PublicKeyLoaderRsaClass {
-  public static function PublicKeyLoaderFunc() {
+  public static function PublicKeyLoaderFunc()
+  {
       $rsa = new RSA();
       $rsa->loadKey('...');
       $rsa->getSize();
   }
 
-  public static function PublicKeyLoaderFuncWithEcho() {
-      $rsaEcho = new RSA();
-      $rsaEcho->loadKey('...');
-      echo $rsaEcho->getSize();
+  public function PublicKeyLoaderLengthFunc()
+  {
+      $rsa = new RSA();
+      $rsa->loadKey('...');
+      $rsaLength = $rsa->getSize();
   }
 }
 
@@ -29,9 +31,10 @@ class PublicKeyLoaderRsaClass {
       $rsa->getLength();
   }
 
-  public static function PublicKeyLoaderFuncWithEcho() {
-      $rsaEcho = PublicKeyLoader::load('...');
-      echo $rsaEcho->getLength();
+  public function PublicKeyLoaderLengthFunc()
+  {
+      $rsa = PublicKeyLoader::load('...');
+      $rsaLength = $rsa->getLength();
   }
 }
 

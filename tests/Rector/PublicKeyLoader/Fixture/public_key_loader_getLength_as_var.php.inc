@@ -3,10 +3,11 @@
 use phpseclib\Crypt\RSA;
 
 class PublicKeyLoaderRsaClass {
-  public static function PublicKeyLoaderSetSignatureMode() {
+  public function PublicKeyLoaderLengthFunc()
+  {
       $rsa = new RSA();
       $rsa->loadKey('...');
-      $rsa->setSignatureMode(RSA::SIGNATURE_PKCS1);
+      $rsaLength = $rsa->getSize();
   }
 }
 
@@ -17,10 +18,10 @@ class PublicKeyLoaderRsaClass {
 use phpseclib3\Crypt\PublicKeyLoader;
 
 class PublicKeyLoaderRsaClass {
-  public static function PublicKeyLoaderSetSignatureMode()
+  public function PublicKeyLoaderLengthFunc()
   {
       $rsa = PublicKeyLoader::load('...');
-      $rsa = $rsa->withPadding(RSA::SIGNATURE_PKCS1);
+      $rsaLength = $rsa->getLength();
   }
 }
 
