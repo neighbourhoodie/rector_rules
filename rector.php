@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
-use phpseclib\phpseclib3Rector\Set;
+use phpseclib\rectorRules\Set;
 
 return RectorConfig::configure()
     ->withSets([Set::PATH]);

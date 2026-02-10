@@ -1,10 +1,10 @@
 <?php
-namespace phpseclib\phpseclib3Rector;
+namespace phpseclib\rectorRules;
 
 use Rector\Config\RectorConfig;
 use Rector\Renaming\Rector\Name\RenameClassRector;
 
-if (!class_exists('\phpseclib\phpseclib3Rector\Set'))
+if (!class_exists('\phpseclib\rectorRules\Set'))
 {
     class Set
     {
@@ -18,7 +18,7 @@ return RectorConfig::configure()
         SFTPFilesize::class,
         HashLength::class,
         PublicKeyLoader::class,
-        PublicKeyLoaderChained::class,
+        // PublicKeyLoaderChained::class,
     ])
     ->withConfiguredRule(RenameClassRector::class, [
         'phpseclib\Crypt\RSA' => 'phpseclib3\Crypt\RSA',
