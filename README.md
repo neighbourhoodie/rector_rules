@@ -1,4 +1,4 @@
-# phpseclib3_rector
+# rector_rules
 
 Rector rules to upgrade a phpseclib v2.0 install to phpseclib v3.0
 
@@ -11,7 +11,7 @@ You can use [phpseclib2_compat](https://github.com/phpseclib/phpseclib2_compat) 
 With [Composer](https://getcomposer.org/):
 
 ```
-composer require phpseclib/phpseclib3_rector:~1.0
+composer require phpseclib/rector_rules:~1.0
 ```
 
 ## Usage
@@ -21,10 +21,10 @@ Create a rector.php file with the following contents:
 ```php
 <?php
 use Rector\Config\RectorConfig;
-use phpseclib\phpseclib3Rector\Set;
+use phpseclib\rectorRules\Set\V2toV3Set;
 
 return RectorConfig::configure()
-    ->withSets([Set::PATH]);
+    ->withSets([V2toV3Set::PATH]);
 ```
 In the same directory where you created that file you can then run Rector by doing either of these commands:
 
