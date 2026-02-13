@@ -1,8 +1,17 @@
 # Rules for v3 to v4 Rector
 
+These are the rules, used for the phpsecliv `v3` to phpseclib `v4` upgrade.
+
+## Handle File Imports
+
+In `v3` there is ony `phpseclib3\File\X509` for all available certs. `v4` seperates them to
+`phpseclib4\File\X509`, `phpseclib4\File\CSR` and `phpseclib4\File\CRL`. This Rector rule handles the different imports.
+
+First, it deletes `use phpseclib3\File\X509;`. Then it refactores the method and at the end, it adds the needed `use` statement.
+
 ## Reading X.509 certs
 
-This rule is for `v3` -> `v4` upgrade. In `v4` parsing is to moved to static call and there is no need to instantiate the object.
+In `v4` parsing is to moved to static call and there is no need to instantiate the object.
 
 It replaces
 ```php
