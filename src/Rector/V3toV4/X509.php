@@ -11,6 +11,10 @@ use PhpParser\Node\Expr\New_;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Stmt\Expression;
+use PhpParser\Node\Identifier;
+use PhpParser\Node\Arg;
+use PhpParser\Node\Expr\ClassConstFetch;
+use PhpParser\Node\Name;
 
 use Rector\Rector\AbstractRector;
 
@@ -49,9 +53,51 @@ final class X509 extends AbstractRector
       $node->expr->var instanceof Variable &&
       $node->expr->var->name === $this->x509VarName &&
       $this->isName($node->expr->name, 'validateDate')
-      ) {
+    ) {
       return NodeTraverser::REMOVE_NODE;
     }
+
+  // Delete: $variable = $x509->validateDate()
+    if (
+      $node instanceof Expression &&
+      $node->expr instanceof Assign &&
+      $node->expr->expr instanceof MethodCall &&
+      $node->expr->expr->var instanceof Variable &&
+      $node->expr->expr->var->name === $this->x509VarName &&
+      $this->isName($node->expr->expr->name, 'validateDate')
+    ) {
+      return NodeTraverser::REMOVE_NODE;
+    }
+
+    if (
+      ! $node instanceof MethodCall ||
+      ! $node->var instanceof Variable ||
+      ! $node->var->name === $this->x509VarName
+    ) {
+      return null;
+    }
+
+    // Replace getDN() with getSubjectDN()
+    if ($this->isName($node->name, 'getDN')) {
+      $node->name = new Identifier('getSubjectDN');
+      // Add X509::DN_ARRAY only if no argument present
+      if (count($node->args) === 0) {
+        $node->args[0] = new Arg(
+          new ClassConstFetch(
+            new Name('X509'),
+            'DN_ARRAY'
+          )
+        );
+      }
+      return $node;
+    }
+
+    // Replace setDNProp with addDNProp and keep arguments
+    if ($this->isName($node->name, 'setDNProp')) {
+      $node->name = new Identifier('addDNProp');
+      return $node;
+    }
+
     return null;
   }
 }
