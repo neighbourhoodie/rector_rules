@@ -62,6 +62,11 @@ To run all Retor tests, run
 vendor/bin/phpunit tests
 ```
 
+To run all tests of a ruleset, add the name of it, like
+```bash
+vendor/bin/phpunit tests --filter V2toV3
+```
+
 To run all tests of a single rector rule, add --filter to the test command.
 
 ```bash
@@ -79,7 +84,7 @@ A. `test_fixture.php.inc` - The Code Should Change
 ```php
 <code before>
 -----
-<code after>'
+<code after>
 ```
 
 B. `skip_rule_test_fixture.php.inc` - The Code Should Be Skipped
