@@ -1,4 +1,4 @@
-# phpseclib3_rector
+# rector_rules
 
 Rector rules to upgrade a phpseclib v2.0 install to phpseclib v3.0
 
@@ -11,7 +11,7 @@ You can use [phpseclib2_compat](https://github.com/phpseclib/phpseclib2_compat) 
 With [Composer](https://getcomposer.org/):
 
 ```
-composer require phpseclib/phpseclib3_rector:~1.0
+composer require phpseclib/rector_rules:~1.0
 ```
 
 ## Usage
@@ -21,10 +21,10 @@ Create a rector.php file with the following contents:
 ```php
 <?php
 use Rector\Config\RectorConfig;
-use phpseclib\phpseclib3Rector\Set;
+use phpseclib\rectorRules\Set\V2toV3Set;
 
 return RectorConfig::configure()
-    ->withSets([Set::PATH]);
+    ->withSets([V2toV3Set::PATH]);
 ```
 In the same directory where you created that file you can then run Rector by doing either of these commands:
 
@@ -104,10 +104,10 @@ Additionally it replaces the following methods:
 | $rsa->getSize()               | $rsa->getLength()                     |
 | $rsa->setHash('sha256');      | $rsa = $rsa->withHash('sha256')       |
 | $rsa->setMGFHash('sha256');   | $rsa = $rsa->withMGFHash('sha256')    |
-| $rsa->setSaltLength(10);      | $rsa->withSaltLength(10)              |
-| $rsa->setSignatureMode(RSA::SIGNATURE_PKCS1);     | $rsa->withPadding(RSA::SIGNATURE_PKCS1);  |
-| $rsa->setEncryptionMode(RSA::ENCRYPTION_PKCS1);   | $rsa->withPadding(RSA::ENCYRPTION_PKCS1); |
-| $rsa->setEncryptionMode(RSA::ENCRYPTION_PKCS1); $rsa->setSignatureMode(RSA::SIGNATURE_PKCS1); | $rsa->withPadding(RSA::SIGNATURE_PKCS1 | RSA::ENCYRPTION_PKCS1);|
+| $rsa->setSaltLength(10);      | $rsa = $rsa->withSaltLength(10)       |
+| $rsa->setSignatureMode(RSA::SIGNATURE_PKCS1);     | $rsa = $rsa->withPadding(RSA::SIGNATURE_PKCS1);  |
+| $rsa->setEncryptionMode(RSA::ENCRYPTION_PKCS1);   | $rsa = $rsa->withPadding(RSA::ENCYRPTION_PKCS1); |
+| $rsa->setEncryptionMode(RSA::ENCRYPTION_PKCS1); $rsa->setSignatureMode(RSA::SIGNATURE_PKCS1); | $rsa = $rsa->withPadding(RSA::SIGNATURE_PKCS1 | RSA::ENCYRPTION_PKCS1);|
 
 ### Public Key Loader Chained
 
@@ -198,3 +198,37 @@ $sftp = new SFTP('...');
 $sftp->login('username', 'password');
 echo $sftp->filesize('/path/to/filename.ext');
 ```
+
+### Symmetric Key Constructor
+
+This rule is for `v2` -> `v3` upgrade.
+
+In phpseclib v2 you'd instantiate the constructor by doing stuff like this:
+
+```php
+$cipher = new AES(AES::MODE_CTR);
+```
+
+In phpseclib v3 that's been replaced with strings. eg.
+
+```php
+$cipher = new AES('ctr');
+```
+
+Also, in phpseclib v2, `$cipher = new AES()` was the same as `$cipher = new AES(AES::MODE_CBC)`.
+In v3 it doesn't default to cbc - the mode needs to be explicitly defined.
+
+
+This is true for all the classes that extend `\phpseclib3\Crypt\Common\BlockCipher` in v3:
+
+|                          v2                       |                   v3                  |
+|---------------------------------------------------|---------------------------------------|
+| $default = new DES();                             |  $default = new DES('cbc');           |
+| $des = new DES(DES::MODE_CBC);                    |  $des = new DES('cbc');               |
+| $rijndael = new Rijndael(Rijndael::MODE_ECB);     |  $rijndael = new Rijndael('ecb');     |
+| $tripleDES = new TripleDES(TripleDES::MODE_CTR);  |  $tripleDES = new TripleDES('ctr');   |
+| $blowfish = new Blowfish(Blowfish::MODE_CFB);     |  $blowfish = new Blowfish('cfb');     |
+| $twofish = new Twofish(Twofish::MODE_CFB8);       |  $twofish = new Twofish('cfb8');      |
+| $rc2 = new RC2(RC2::MODE_OFB);                    |  $rc2 = new RC2('ofb');               |
+| $aes = new AES(AES::MODE_OFB8);                   |  $aes = new AES('ofb8');              |
+| $aes2 = new AES(AES::MODE_GCM);                   |  $aes2 = new AES('gcm');              |
