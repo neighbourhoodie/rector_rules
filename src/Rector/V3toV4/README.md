@@ -14,3 +14,17 @@ with
 ```php
 $cert = \phpseclib4\File\X509::load(file_get_contents('google.crt'));
 ```
+
+## Set DN Prop
+
+`setDNProp()` in phpseclib `v3` was adding a DN prop even if one already existed. In `v4` `addDNProp` is used instead.
+
+It replaces
+```php
+$x509->setDNProp('id-at-organizationName', 'phpseclib CA cert');
+```
+with
+
+```php
+$x509->addDNProp('id-at-organizationName', 'phpseclib CA cert');
+```
