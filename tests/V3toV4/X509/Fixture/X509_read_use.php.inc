@@ -11,8 +11,8 @@ print_r($cert);
 -----
 <?php
 
-$cert = \phpseclib4\File\X509::load('...');
+use phpseclib4\File\X509;
+
+$cert = X509::load('...');
 
 print_r($cert);
-
-?>

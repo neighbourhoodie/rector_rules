@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace phpseclib\rectorRules\Rector\V3toV4;
 
+use PhpParser\NodeTraverser;
 use PhpParser\Node;
 use PhpParser\Node\Name;
 use PhpParser\Node\Expr\Assign;
@@ -12,29 +13,24 @@ use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Stmt\Expression;
-use PhpParser\NodeTraverser;
-use PhpParser\Node\Stmt\Use_;
-use PhpParser\Node\UseItem;
 
 use Rector\Rector\AbstractRector;
 
 final class X509 extends AbstractRector
 {
   private ?string $x509Var = null;
-  private bool $x509Converted = false;
 
   public function getNodeTypes(): array
   {
     return [
       Expression::class,
       MethodCall::class,
-      Use_::class,
     ];
   }
 
   public function refactor(Node $node): Node|int|null
   {
-    // Remove: $x509 = new X509() or new \phpseclib3\File\X509()
+    // Get the X509 varname
     if ($node instanceof Expression && $node->expr instanceof Assign) {
       $assign = $node->expr;
       if (
@@ -43,19 +39,6 @@ final class X509 extends AbstractRector
         $this->isName($assign->expr->class, 'phpseclib3\File\X509')
       ) {
         $this->x509Var = $assign->var->name;
-        $this->x509Converted = true;
-        return NodeTraverser::REMOVE_NODE;
-      }
-    }
-
-    // Remove use phpseclib3\File\X509
-    if ($this->x509Converted && $node instanceof Use_) {
-      foreach ($node->uses as $key => $useItem) {
-        if ($useItem instanceof UseItem &&
-          $this->isName($useItem->name, 'phpseclib3\File\X509')
-        ) {
-            return NodeTraverser::REMOVE_NODE;
-        }
       }
     }
 
