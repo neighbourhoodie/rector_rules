@@ -17,7 +17,7 @@ In `v4` parsing is moved to static call and there is no need to instantiate the 
 It removes the `$x509 = new X509()` assignments.
 
 Additionally, it removes the Date Validation `$x509->validateDate()`.
-In `v4` `validateSignature()` takes care of this, altho one could write their own custom date validation code.
+In `v4` `validateSignature()` takes care of this, although one could write their own custom date validation code.
 
 
 ## Set DN Prop
