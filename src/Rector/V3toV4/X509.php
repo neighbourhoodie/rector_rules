@@ -6,10 +6,8 @@ namespace phpseclib\rectorRules\Rector\V3toV4;
 
 use PhpParser\NodeTraverser;
 use PhpParser\Node;
-use PhpParser\Node\Name;
 use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\New_;
-use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Stmt\Expression;
@@ -18,7 +16,7 @@ use Rector\Rector\AbstractRector;
 
 final class X509 extends AbstractRector
 {
-  private ?string $x509Var = null;
+  private ?string $x509VarName = null;
 
   public function getNodeTypes(): array
   {
@@ -30,31 +28,29 @@ final class X509 extends AbstractRector
 
   public function refactor(Node $node): Node|int|null
   {
-    // Get the X509 varname
-    if ($node instanceof Expression && $node->expr instanceof Assign) {
-      $assign = $node->expr;
-      if (
-        $assign->var instanceof Variable &&
-        $assign->expr instanceof New_ &&
-        $this->isName($assign->expr->class, 'phpseclib3\File\X509')
-      ) {
-        $this->x509Var = $assign->var->name;
+    // Collect varnames that refer to phpseclib3\File\X509
+    // remove unused $x509 = new X509() assignments
+    if (
+      $node instanceof Expression &&
+      $node->expr instanceof Assign &&
+      $node->expr->expr instanceof New_) {
+      if ($this->isName($node->expr->expr->class, 'phpseclib3\File\X509')) {
+        $this->x509VarName = $node->expr->var->name;
+        return NodeTraverser::REMOVE_NODE;
       }
+      return null;
     }
 
-    // Replace: $x509->loadX509(...) → X509::load(...)
-    if ($node instanceof MethodCall) {
-      if (
-        $node->var instanceof Variable &&
-        $node->var->name === $this->x509Var &&
-        $this->isName($node->name, 'loadX509')
+    // Delete: $x509->validateDate()
+    // This is handled by validateSignature() now
+    if (
+      $node instanceof Expression &&
+      $node->expr instanceof MethodCall &&
+      $node->expr->var instanceof Variable &&
+      $node->expr->var->name === $this->x509VarName &&
+      $this->isName($node->expr->name, 'validateDate')
       ) {
-        return new StaticCall(
-          new Name('\phpseclib4\File\X509'),
-          'load',
-          $node->args
-        );
-      }
+      return NodeTraverser::REMOVE_NODE;
     }
     return null;
   }

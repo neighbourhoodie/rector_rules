@@ -67,10 +67,6 @@ final class HandleFileX509Imports extends AbstractRector
         $varName = $this->getName($node->expr->var);
         if ($varName !== null) {
           $this->x509Vars[$varName] = true;
-
-          // remove unused $x509 = new X509() assignments
-          // TODO: don't remove when it's a X509 import
-          return NodeTraverser::REMOVE_NODE;
         }
       }
       return null;

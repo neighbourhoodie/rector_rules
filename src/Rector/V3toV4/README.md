@@ -7,22 +7,18 @@ These are the rules, used for the phpseclib `v3` to phpseclib `v4` upgrade.
 In `v3` there is only `phpseclib3\File\X509` for all available certs. `v4` seperates them to
 `phpseclib4\File\X509`, `phpseclib4\File\CSR` and `phpseclib4\File\CRL`. This Rector rule handles the different imports.
 
-First, it deletes `use phpseclib3\File\X509;`. Then it refactors the method and at the end, it adds the needed `use` statement.
+This rule runs *before* all other rules.
+It refactors the static method and it adds or replaces the needed `use` statement at the end.
 
-## Reading X.509 certs
+## X.509
 
 In `v4` parsing is moved to static call and there is no need to instantiate the object.
 
-It replaces
-```php
-$x509 = new \phpseclib3\File\X509();
-$cert = $x509->loadX509(file_get_contents('google.crt'));
-```
-with
+It removes the `$x509 = new X509()` assignments.
 
-```php
-$cert = \phpseclib4\File\X509::load(file_get_contents('google.crt'));
-```
+Additionally, it removes the Date Validation `$x509->validateDate()`.
+In `v4` `validateSignature()` takes care of this, altho one could write their own custom date validation code.
+
 
 ## Set DN Prop
 
