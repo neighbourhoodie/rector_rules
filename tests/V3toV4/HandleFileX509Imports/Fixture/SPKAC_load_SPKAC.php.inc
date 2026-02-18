@@ -19,6 +19,7 @@ final class SomeClass
 {
   function foo()
   {
+    $x509 = new X509();
     $spkac = CRL::loadCRL(file_get_contents('spkac.txt'));
   }
 }

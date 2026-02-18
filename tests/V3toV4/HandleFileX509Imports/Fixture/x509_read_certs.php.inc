@@ -21,6 +21,7 @@ final class SomeClass
 {
   function foo()
   {
+    $x509 = new X509();
     $cert = X509::load(file_get_contents('google.crt'));
   }
 }
