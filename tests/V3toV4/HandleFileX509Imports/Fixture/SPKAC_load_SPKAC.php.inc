@@ -4,7 +4,7 @@ final class SomeClass
 {
   function foo()
   {
-    $x509 = new \phpseclib3\File\X509();
+    $x509 = new X509();
     $spkac = $x509->loadSPKAC(file_get_contents('spkac.txt'));
   }
 }
