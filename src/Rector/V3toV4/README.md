@@ -20,7 +20,7 @@ Additionally, it removes the Date Validation `$x509->validateDate()`.
 In `v4` `validateSignature()` takes care of this, although one could write their own custom date validation code.
 
 
-## Set DN Prop
+### Set DN Prop
 
 `setDNProp()` in phpseclib `v3` was adding a DN prop even if one already existed. In `v4` `addDNProp` is used instead.
 
@@ -32,4 +32,18 @@ with
 
 ```php
 $x509->addDNProp('id-at-organizationName', 'phpseclib CA cert');
+```
+
+### Get Subject DN
+
+In v4 `getDN` is no longer used and instead `getSubjectDN` is used. If no parameter is present in v3 then X509::DN_ARRAY should be present in v4
+
+It replaces
+```php
+$x509->getDN(...);
+```
+with
+
+```php
+$x509->getSubjectDN(...);
 ```
