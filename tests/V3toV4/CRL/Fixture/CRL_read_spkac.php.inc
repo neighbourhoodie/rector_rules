@@ -2,10 +2,8 @@
 
 use phpseclib3\File\X509;
 
-final class SomeClass
-{
-  public function foo()
-  {
+class ReadSpkacClass {
+  public static function foo() {
     $x509 = new X509();
     $spkac = $x509->loadSPKAC(file_get_contents('spkac.txt'));
   }
@@ -17,11 +15,8 @@ final class SomeClass
 
 use phpseclib4\File\CRL;
 
-final class SomeClass
-{
-  public function foo()
-  {
-    $x509 = new X509();
+class ReadSpkacClass {
+  public static function foo() {
     $spkac = CRL::loadCRL(file_get_contents('spkac.txt'));
   }
 }

@@ -2,10 +2,8 @@
 
 use phpseclib3\File\X509;
 
-final class SomeClass
-{
-  public function foo()
-  {
+class ReadCRLClass {
+  public static function foo() {
     $x509 = new X509();
     $crl = $x509->loadCRL(file_get_contents('crl.bin'));
   }
@@ -17,11 +15,8 @@ final class SomeClass
 
 use phpseclib4\File\CRL;
 
-final class SomeClass
-{
-  public function foo()
-  {
-    $x509 = new X509();
+class ReadCRLClass {
+  public static function foo() {
     $crl = CRL::loadCRL(file_get_contents('crl.bin'));
   }
 }

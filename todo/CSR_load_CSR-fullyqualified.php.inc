@@ -1,12 +1,10 @@
 <?php
 
-use phpseclib3\File\X509;
-
 final class SomeClass
 {
-  public function foo()
+  function foo()
   {
-    $x509 = new X509();
+    $x509 = new \phpseclib3\File\X509();
     $csr = $x509->loadCSR(file_get_contents('csr.csr'));
   }
 }
@@ -19,11 +17,9 @@ use phpseclib4\File\CSR;
 
 final class SomeClass
 {
-  public function foo()
+  function foo()
   {
-    $x509 = new X509();
+    $x509 = new \phpseclib3\File\X509();
     $csr = CSR::loadCSR(file_get_contents('csr.csr'));
   }
 }
-
-?>
