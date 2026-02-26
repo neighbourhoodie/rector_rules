@@ -2,7 +2,7 @@
 
 class CSRStringClass {
   public static function CSRString() {
-    echo $x509->saveCSR($csr);
+    $x509->saveCSR($csr);
   }
 }
 
@@ -12,7 +12,7 @@ class CSRStringClass {
 
 class CSRStringClass {
   public static function CSRString() {
-    echo $csr->toString();
+    $csr->toString();
   }
 }
 

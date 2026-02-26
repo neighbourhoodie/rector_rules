@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace phpseclib\rectorRules\Rector\V3toV4;
 
 use PhpParser\Node;
-use PhpParser\Node\Stmt\Echo_;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Stmt\Expression;
 use PhpParser\Node\Expr\Assign;
@@ -20,7 +19,6 @@ final class CSR extends AbstractRector
   {
     return [
       Expression::class,
-      Echo_::class
     ];
   }
 
@@ -41,23 +39,17 @@ final class CSR extends AbstractRector
     }
 
     // replace $x509->saveCSR($csr) with $csr->toString()
-    if ($node instanceof Echo_) {
-      foreach ($node->exprs as $key => $expr) {
-        if (! $expr instanceof MethodCall) {
-          return null;
-        }
-        if ($this->isName($expr->name, 'saveCSR')) {
-          if (! isset($expr->args[0])) {
-            return null;
-          }
-          $node->exprs[$key] = new MethodCall(
-            $expr->args[0]->value,
-            new Identifier('toString')
-          );
-        }
-      }
+    if (
+      $node instanceof Expression &&
+      $node->expr instanceof MethodCall &&
+      $this->isName($node->expr->name, 'saveCSR')
+      ) {
+        return new Expression(new Methodcall(
+          $node->expr->args[0]->value,
+          new Identifier('toString')
+        ));
     }
 
-    return $node;
+    return null;
   }
 }
