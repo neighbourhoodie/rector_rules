@@ -157,10 +157,69 @@ class SetDNPropClass {
   }
 }
 
-class SetDNPropClass {
+class X509SetDNPropClass {
   public static function SetDNProp() {
     $x509->setDNProp('id-at-organizationName', 'phpseclib CA cert');
     // $x509->addDNProp('id-at-organizationName', 'phpseclib CA cert');
+  }
+}
+
+class CSRSetDNPropClass {
+  public static function SetDNProp() {
+    $csr->setDNProp('id-at-organizationName', 'phpseclib CA cert');
+    // $csr->addDNProp('id-at-organizationName', 'phpseclib CA cert');
+  }
+}
+
+class X509CertificateCreation {
+  public function X509CertificateCreation () {
+    $subject = new X509();
+    $subject->setPublicKey($pubKey);
+    $subject->setDN('/O=phpseclib demo subject');
+
+    $issuer = new X509();
+    $issuer->setPrivateKey($privKey);
+    $issuer->setDN('/O=phpseclib demo issuer');
+
+    $x509 = new X509();
+    $result = $x509->sign($issuer, $subject);
+    echo $x509->saveX509($result);
+
+    // $x509 = new X509($pubKey);
+    // $x509->setSubjectDN('O=phpseclib demo issuer');
+    // $x509->setIssuerDN('O=phpseclib demo subject');
+    // $privKey->sign($x509);
+    // echo $x509->toString();
+  }
+}
+
+class CreatingCSR {
+  public function CreatingCSR () {
+    $x509 = new X509();
+    $x509->setPrivateKey($privKey);
+    $x509->setDNProp('id-at-organizationName', 'phpseclib demo cert');
+
+    $csr = $x509->signCSR();
+
+    echo $x509->saveCSR($csr);
+
+    // $csr = new \phpseclib4\File\CSR($privKey->getPublicKey());
+    // $csr->setDNProp('id-at-organizationName', 'phpseclib demo cert');
+    // $privKey->sign($csr);
+    // echo $csr->toString();
+  }
+}
+
+class LoadingSPKACS {
+  public function LoadingSPKACS () {
+    $x509 = new X509();
+    $x509->setPrivateKey($privKey);
+    $x509->setChallenge('123456789');
+    $spkac = $x509->signSPKAC();
+
+    // $spkac = new \phpseclib4\File\CRL::loadCRL($privKey->getPublicKey());
+    // $spkac->setChallenge('123456789');
+    // $privKey->sign($spkac);
   }
 }
 
