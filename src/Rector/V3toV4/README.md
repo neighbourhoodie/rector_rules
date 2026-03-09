@@ -67,7 +67,6 @@ $x509a->getSubjectDN(X509::DN_ARRAY);
 #### Create cert
 
 Previously you needed three X509 instances - now you just need one.
-<!-- If this is too difficult to do we can skip it and just make note of it in the README.md under some sort of Limitations section -->
 
 ```php
 $subject = new X509();
@@ -129,10 +128,9 @@ will be refactored to
 $x509->addDNProp('id-at-organizationName', 'phpseclib CA cert');
 ```
 
-#### Create cert TBD
+#### Create cert
 
 Previously you needed three X509 instances - now you just need one.
-<!-- If this is too difficult to do we can skip it and just make note of it in the README.md under some sort of Limitations section -->
 
 ```php
 $x509 = new X509();
