@@ -22,7 +22,6 @@ use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Scalar\String_;
 use Rector\PhpParser\Node\FileNode;
 
-use Rector\PhpParser\Node\BetterNodeFinder;
 use Rector\Rector\AbstractRector;
 
 final class X509 extends AbstractRector
@@ -32,11 +31,12 @@ final class X509 extends AbstractRector
   private array $usedImports = [];
   private bool $isCSR = false;
   private bool $isX509 = false;
-  private $privKeyObj = '';
-  private $pubKeyObj = '';
+  private string $privKeyObj = '';
+  private string $pubKeyObj = '';
   private ?string $subjectVar = null;
   private ?string $issuerVar = null;
 
+  // targetClass, targetMethod
   private const METHOD_TO_CLASS = [
     'loadX509' => ['phpseclib4\File\X509', 'load'],
     'loadCSR'  => ['phpseclib4\File\CSR', 'loadCSR'],
@@ -45,10 +45,6 @@ final class X509 extends AbstractRector
     'setPrivateKey'=> ['phpseclib4\File\CRL', 'loadCRL'], // Set to CRL per default
     // 'setPrivateKey'=> ['phpseclib4\File\CSR', 'new CSR($privKey->getPublicKey())'],
   ];
-
-  public function __construct(
-    private BetterNodeFinder $betterNodeFinder
-  ) {}
 
   public function getNodeTypes(): array
   {
@@ -60,7 +56,7 @@ final class X509 extends AbstractRector
     ];
   }
 
-  public function stmtsWithoutLegacyImport($stmts) {
+  private function stmtsWithoutLegacyImport($stmts) {
     return array_values(array_filter($stmts, function ($stmt) {
       if (!$stmt instanceof Use_) {
         return true;
@@ -73,6 +69,33 @@ final class X509 extends AbstractRector
       // Keep Use_ only if it has at least one UseItem left
       return count($stmt->uses) > 0;
     }));
+  }
+
+  private function getAssignedMethodCall(Expression $node): ?MethodCall {
+    if (
+      $node->expr instanceof Assign &&
+      $node->expr->expr instanceof MethodCall
+    ) {
+      return $node->expr->expr;
+    }
+    return null;
+  }
+
+  private function wrapPrivateKeyArg(array $args): array
+  {
+    if (isset($args[0])) {
+      $args[0]->value = new MethodCall($args[0]->value, new Identifier('getPublicKey'));
+    }
+    return $args;
+  }
+
+  private function reset() {
+    $this->isCSR = false;
+    $this->isX509 = false;
+    $this->subjectVar = null;
+    $this->issuerVar = null;
+    $this->privKeyObj = '';
+    $this->pubKeyObj = '';
   }
 
   public function refactor(Node $node): int|null|Node
@@ -92,10 +115,7 @@ final class X509 extends AbstractRector
 
     if($node instanceof Class_) {
       // A file can have several classes, so reset for the new class
-      $this->isCSR = false;
-      $this->isX509 = false;
-      $this->subjectVar = null;
-      $this->issuerVar = null;
+      $this->reset();
 
       if ($node->getAttribute(X509NodeVisitor::IS_X509, false)) {
         $this->isX509 = true;
@@ -145,52 +165,41 @@ final class X509 extends AbstractRector
 
     // Delete validateDate()
     // This is handled by validateSignature() now
-    $validateDateCalls = $this->betterNodeFinder->find($node, function(Node $n) {
-      return $n instanceof MethodCall
-        && $n->var instanceof Variable
-        && isset($this->x509Vars[$n->var->name])
-        && $this->isName($n->name, 'validateDate');
-    });
-    foreach ($validateDateCalls as $call) {
-      return NodeTraverser::REMOVE_NODE;
-    }
+    if ($node instanceof Expression) {
+      $call = $this->getAssignedMethodCall($node) ?? ($node->expr instanceof MethodCall ? $node->expr : null);
 
-    if (
-      $node instanceof Expression &&
-      $node->expr instanceof Assign &&
-      $node->expr->expr instanceof MethodCall &&
-      isset($this->x509Vars[$node->expr->expr->var->name]) &&
-      $this->isNames($node->expr->expr->name, ['signCSR', 'signSPKAC'])
-    ) {
-      return new Expression(new Methodcall(
-        new Variable($this->privKeyObj),
-        'sign',
-        [new Arg($node->expr->var)]
-      ));
-    }
-
-    // Handle X509
-    if($this->isX509) {
-      // $result = $x509->sign($issuer, $subject) to $privKey->sign($x509)
       if (
-        $node instanceof Expression &&
-        $node->expr instanceof Assign &&
-        $node->expr->expr instanceof MethodCall &&
-        isset($this->x509Vars[$node->expr->expr->var->name]) &&
-        $this->isName($node->expr->expr->name, 'sign')
+        $call instanceof MethodCall &&
+        $call->var instanceof Variable &&
+        isset($this->x509Vars[$this->getName($call->var)]) &&
+        $this->isName($call->name, 'validateDate')
       ) {
-        return new Expression(new Methodcall(
-          new Variable($this->privKeyObj),
-          'sign',
-          [new Arg($node->expr->expr->var)]
-        ));
+        return NodeTraverser::REMOVE_NODE;
       }
+    }
 
-      // Remove setPublicKey() and setPrivateKey() for X509
+    if ($node instanceof Expression) {
+      $call = $this->getAssignedMethodCall($node);
+
       if (
-        $node instanceof Expression &&
-        $node->expr instanceof MethodCall
+        $call instanceof MethodCall &&
+        $call->var instanceof Variable &&
+        isset($this->x509Vars[$this->getName($call->var)]) &&
+        $this->isNames($call->name, ['signCSR', 'signSPKAC'])
       ) {
+        return new Expression(
+          new MethodCall(
+            new Variable($this->privKeyObj),
+            'sign',
+            [new Arg($node->expr->var)]
+          )
+        );
+      }
+    }
+
+    if($this->isX509 && $node instanceof Expression) {
+      // Remove setPublicKey() and setPrivateKey() for X509
+      if ($node->expr instanceof MethodCall) {
         $methodCall = $node->expr;
         if (!$methodCall->var instanceof Variable) {
           return null;
@@ -199,13 +208,26 @@ final class X509 extends AbstractRector
           return NodeTraverser::REMOVE_NODE;
         }
       }
+
+      // $result = $x509->sign($issuer, $subject) to $privKey->sign($x509)
+      $call = $this->getAssignedMethodCall($node);
+      if (
+          $call instanceof MethodCall &&
+          $call->var instanceof Variable &&
+          isset($this->x509Vars[$this->getName($call->var)]) &&
+          $this->isName($call->name, 'sign')
+      ) {
+        return new Expression(
+          new MethodCall(
+            new Variable($this->privKeyObj),
+            'sign',
+            [new Arg($call->var)]
+          )
+        );
+      }
     }
 
-    if (!$node instanceof MethodCall) {
-      return null;
-    }
-
-    if (!$node->var instanceof Variable) {
+    if (!$node instanceof MethodCall || !$node->var instanceof Variable) {
       return null;
     }
 
@@ -221,45 +243,28 @@ final class X509 extends AbstractRector
       return null;
     }
 
-    if(isset(self::METHOD_TO_CLASS[$methodName])) {
+    if (isset(self::METHOD_TO_CLASS[$methodName])) {
       [$targetClass, $targetMethod] = self::METHOD_TO_CLASS[$methodName];
       $parts = explode('\\', $targetClass);
       $shortClass = end($parts);
 
-      // add ->getPublicKey() to args for setPrivateKey
-      $args = $node->args;
-      if ($methodName === 'setPrivateKey' && isset($args[0])) {
-        $wrappedExpr = new MethodCall(
-            $args[0]->value,
-            new Identifier('getPublicKey')
-        );
-        $args[0]->value = $wrappedExpr;
-      }
-
-      $staticCall = new StaticCall(
-        new Name($shortClass),
-        $targetMethod,
-        $args
-      );
-
       if ($methodName === 'setPrivateKey') {
-        // $csr = new CSR($privKey->getPublicKey());
-        if($this->isCSR) {
+        $args = $this->wrapPrivateKeyArg($node->args);
+
+        if ($this->isCSR) {
           return new Assign(
             new Variable('csr'),
-            new New_(
-              new Name('CSR'),
-              $args
-            )
+            new New_(new Name('CSR'), $args)
           );
         }
-        // $spkac = CRL::loadCRL(file_get_contents('spkac.txt'));
+
         return new Assign(
           new Variable('spkac'),
-          $staticCall
+          new StaticCall(new Name($shortClass), $targetMethod, $args)
         );
       }
-      return $staticCall;
+
+      return new StaticCall(new Name($shortClass), $targetMethod, $node->args);
     }
 
     switch ($methodName) {
@@ -304,16 +309,10 @@ final class X509 extends AbstractRector
         return $node;
 
       case 'saveCSR':
-        return new Methodcall(
-          $node->args[0]->value,
-          new Identifier('toString')
-        );
+        return new Methodcall($node->args[0]->value, new Identifier('toString'));
 
       case 'saveX509':
-        return new Methodcall(
-          $node->var,
-          new Identifier('toString')
-      );
+        return new Methodcall($node->var, new Identifier('toString'));
 
       case 'setChallenge':
         $node->var = new Variable('spkac');
